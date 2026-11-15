@@ -13,12 +13,13 @@ async function run(scenario, check) {
   } finally { store.close(); await source.close(); }
 }
 
-for (const scenario of ['normal', 'compressed']) {
+for (const scenario of ['normal', 'compressed', 'unknown-count']) {
   test(scenario + ' retains long-string slots and user missing semantics', async () => {
     await run(scenario, async result => {
       assert.equal(result.status, 'complete'); assert.equal(result.records.length, 2);
       assert.equal(result.variables.length, 2);
       assert.equal(result.variables[0].name, 'respondent_age');
+      assert.ok(result.variables[0].valueLabels.some(row => row.value === 99 && row.label === 'refused'));
       assert.equal(result.records[0].values.respondent_age.value, 42);
       assert.equal(result.records[1].values.respondent_age.missing, 'user');
       assert.equal(result.records[0].values.interview_note.value, 'needs visit');
